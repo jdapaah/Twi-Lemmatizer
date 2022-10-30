@@ -5,13 +5,17 @@ from vowels import VOWEL_CAP_O as O#Ɔ
 
 irregular_verbs = {"nni": 'w'+o}
 
-# Does this word actually exist in Twi?
+# return true if the word actually exist in Twi
 def existence(word):
     return True
 
+# get the lemma of a verb in the present negative
+# assumes that pronoun prefixes have been removed
 def present(word: str):
     return word,
 
+# get the lemma of a verb in the present negative
+# assumes that pronoun prefixes have been removed
 def presentN(word: str):
     if word in irregular_verbs:
         return irregular_verbs[word]
