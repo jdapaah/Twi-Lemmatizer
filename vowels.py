@@ -1,0 +1,4 @@
+VOWEL_CAP_O = 'Ɔ'
+VOWEL_SML_O = 'ɔ'
+VOWEL_CAP_E = 'Ɛ'
+VOWEL_SML_E = 'ɛ'
