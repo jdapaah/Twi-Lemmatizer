@@ -17,6 +17,9 @@ def present(word: str):
 # get the lemma of a verb in the present negative
 # assumes that pronoun prefixes have been removed
 def presentN(word: str):
+    return stdN(word)
+
+def stdN(word: str):
     # remove the n prefix and guess the root word
     if word in irregular_verbs:
         return irregular_verbs[word]
@@ -39,7 +42,7 @@ def progressive(word: str):
 
 def progressiveN(word: str):
     # remove the re+n prefix
-    return presentN(word[2:])
+    return stdN(word[2:])
 
 def future(word: str):
     # remove the bɛ prefix
@@ -47,7 +50,7 @@ def future(word: str):
 
 def futureN(word: str):
     # remove the n prefix
-    return presentN(word)
+    return stdN(word)
 
 def immFuture(word:str):
     # remove the re+bɛ prefix
@@ -57,6 +60,24 @@ def immFutureN(word:str):
     # remove the re+n prefix
     return progressiveN(word)
 
+def presPerf(word: str):
+    return word[1:],
+
+def presPerfN(word: str):
+    if word[-2:] in ['i'+e, 'e'+e]:
+        return presentN(word[1:-2])
+    else:
+        return presentN(word[1:-1])
+
+
+def past(word: str):
+    if word[-2:] in ['i'+e, 'e'+e]:
+        return word[:-2]
+    else:
+        return word[:-1],
+
+def pastN(word: str):
+    return stdN(word[1:])
 
 if __name__ == '__main__':
     while 1:
