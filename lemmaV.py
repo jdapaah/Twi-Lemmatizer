@@ -3,21 +3,8 @@ from vowels import VOWEL_SML_E as e#ɛ
 from vowels import VOWEL_CAP_E as E#Ɛ
 from vowels import VOWEL_CAP_O as O#Ɔ
 
+complement_word_ending = ['i'+e, 'e'+e]
 irregular_verbs = {"nni": 'w'+o}
-
-# return true if the word actually exist in Twi
-def existence(word):
-    return True
-
-# get the lemma of a verb in the present negative
-# assumes that pronoun prefixes have been removed
-def present(word: str):
-    return word,
-
-# get the lemma of a verb in the present negative
-# assumes that pronoun prefixes have been removed
-def presentN(word: str):
-    return stdN(word)
 
 def stdN(word: str):
     # remove the n prefix and guess the root word
@@ -36,49 +23,58 @@ def stdN(word: str):
         ret = word[1:],      
     return tuple(ret)
 
-def progressive(word: str):
-    # remove the re prefix
-    return word[2:],
 
-def progressiveN(word: str):
-    # remove the re+n prefix
-    return stdN(word[2:])
+# return true if the word actually exist in Twi
+def existence(word):
+    if word:
+        return True
+    return False
 
-def future(word: str):
-    # remove the bɛ prefix
-    return word[2:],
+def negationPrefix(word: str):
+    if word[:2] in ['nn', 'mm', 'mp', 'mf']:
+        return True
+    if word[0] == 'n':
+        return True
+    return False
+# return if the word can be a possible negation prefix
 
-def futureN(word: str):
-    # remove the n prefix
-    return stdN(word)
-
-def immFuture(word:str):
-    # remove the re+bɛ prefix
-    return word[4:],
-
-def immFutureN(word:str):
-    # remove the re+n prefix
-    return progressiveN(word)
-
-def presPerf(word: str):
-    return word[1:],
-
-def presPerfN(word: str):
-    if word[-2:] in ['i'+e, 'e'+e]:
-        return presentN(word[1:-2])
-    else:
-        return presentN(word[1:-1])
-
-
-def past(word: str):
-    if word[-2:] in ['i'+e, 'e'+e]:
-        return word[:-2]
-    else:
+def lemmatize(word: str):
+    # presperfN w comp
+    if negationPrefix(word) and word[-1]==word[-2]: # n..xx
+        return stdN(word[:-1])
+    # presPerfN wo comp
+    elif negationPrefix(word) and word[-2:] in complement_word_ending: # n...ie
+        return stdN(word[:-2])
+    # futureN, presentN
+    elif negationPrefix(word): #n..
+        return stdN(word)
+    # def pastN(word: str):
+    elif word[0] == 'a' and negationPrefix(word[1:]): # an..
+        return stdN(word[1:])
+    # progressive
+    elif word[:2] == 're': #re..
+        return word[2:],
+    # progressiveN_immFutureN
+    elif word[:2] == 're' and negationPrefix(word[2:]): #ren..
+        return stdN(word[2:])
+    # future
+    elif word[:2] == 'bɛ': # be..
+        return word[2:],
+    # immFuture
+    elif word[:4] == 'rebɛ': # rebɛ..
+        return word[4:],
+    # presPerf
+    elif word[0] == 'a' and len(word)>3: # a..
+        return word[1:],
+    # def past w comp
+    elif word[-2:] in complement_word_ending: #..ie
+        return word[:-2],
+    #past wo comp
+    elif word[-1]==word[-2]: #  ..xx
         return word[:-1],
-
-def pastN(word: str):
-    return stdN(word[1:])
+    else: # present 
+        return word,
 
 if __name__ == '__main__':
     while 1:
-        print(presentN(input()))
+        print(lemmatize(input()))
