@@ -39,41 +39,43 @@ def negationPrefix(word: str):
 # return if the word can be a possible negation prefix
 
 def lemmatize(word: str):
+    results = []
     # presperfN w comp
     if negationPrefix(word) and word[-1]==word[-2]: # n..xx
-        return stdN(word[:-1])
+        results.append(stdN(word[:-1])+('PRP_N',))
     # presPerfN wo comp
     elif negationPrefix(word) and word[-2:] in complement_word_ending: # n...ie
-        return stdN(word[:-2])
+        results.append(stdN(word[:-2])+('PRP_N',))
     # futureN, presentN
     elif negationPrefix(word): #n..
-        return stdN(word)
+        results.append(stdN(word)+('FUT_N/PRS_N',))
     # def pastN(word: str):
     elif word[0] == 'a' and negationPrefix(word[1:]): # an..
-        return stdN(word[1:])
-    # progressive
-    elif word[:2] == 're': #re..
-        return word[2:],
+        results.append(stdN(word[1:])+('PST_N',))
     # progressiveN_immFutureN
     elif word[:2] == 're' and negationPrefix(word[2:]): #ren..
-        return stdN(word[2:])
+        results.append(stdN(word[2:])+('IMF_N/PRG_N',))
+    # progressive
+    elif word[:2] == 're': #re..
+        results.append((word[2:],'PRG'))
     # future
     elif word[:2] == 'bɛ': # be..
-        return word[2:],
+        results.append((word[2:],'FUT'))
     # immFuture
     elif word[:4] == 'rebɛ': # rebɛ..
-        return word[4:],
+        results.append((word[4:],'IMF'))
     # presPerf
     elif word[0] == 'a' and len(word)>3: # a..
-        return word[1:],
+        results.append((word[1:],'PRP'))
     # def past w comp
     elif word[-2:] in complement_word_ending: #..ie
-        return word[:-2],
+        results.append((word[:-2],'PST'))
     #past wo comp
     elif word[-1]==word[-2]: #  ..xx
-        return word[:-1],
+        results.append((word[:-1],'PST'))
     else: # present 
-        return word,
+        results.append((word,'PRS'))
+    return results # filter against dictionary
 
 if __name__ == '__main__':
     while 1:
