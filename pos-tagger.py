@@ -14,7 +14,7 @@ IMF: Immediate Future,
 PST: Past,
 PRP: Present Perfect
 """
-tenses = ['PRS', 'FUT', 'PRG', 'IMF', 'PST', 'PRP', 'PRG_N/IMF_N', 'PRS_N/FUT_N', 'PST_N', 'PRP_N']
+tenses = ['PRS', 'FUT', 'PRG', 'IMF', 'PST', 'PRP', 'PRS_N/FUT_N', 'PRG_N/IMF_N', 'PST_N', 'PRP_N']
 tenses = dict(zip(tenses, [[] for _ in tenses]))
 # tenses.remove('PRS')
 # The present tense functions as the default in the lemmatizer
@@ -23,7 +23,7 @@ for line in open(argv[1]):
     for word in line.translate(str.maketrans('', '', punctuation)).split():
         results = lemmatize(word.lower()) # list of possible tenses
         for i in results:
-            tenses[i[1]].append(i)
+            tenses[i[-1]] +=list(i[:-1])
 
 for k, v in tenses.items():
     print(k, v)

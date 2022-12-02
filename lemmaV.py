@@ -4,7 +4,7 @@ from vowels import VOWEL_CAP_E as E#Ɛ
 from vowels import VOWEL_CAP_O as O#Ɔ
 
 complement_word_ending = ['i'+e, 'e'+e]
-irregular_verbs = {"nni": 'w'+o}
+irregular_verbs = {"nni": 'w'+o, 'mfa': 'de'}
 
 def stdN(word: str):
     # remove the n prefix and guess the root word
@@ -19,19 +19,22 @@ def stdN(word: str):
          for proto in ['n'+word[2:], 'd'+word[2:]]:
             if existence(proto):
                 ret.append(proto)
-    else: # standard word
-        ret = word[1:],      
+    else:
+        proto = word[1:]
+        if existence(proto): # standard word
+            ret.append(proto)     
     return tuple(ret)
 
 
 # return true if the word actually exist in Twi
+# proto word needs to be at least two characters long
 def existence(word):
-    if word:
+    if word and len(word)>=2:
         return True
     return False
 
 def negationPrefix(word: str):
-    if word[:2] in ['nn', 'mm', 'mp', 'mf']:
+    if word[:2] in ['mm', 'mp', 'mf']:
         return True
     if word[0] == 'n':
         return True
@@ -73,8 +76,8 @@ def lemmatize(word: str):
     #past wo comp
     elif word[-1]==word[-2]: #  ..xx
         results.append((word[:-1],'PST'))
-    else: # present 
-        results.append((word,'PRS'))
+    # else: # present 
+    #     results.append((word,'PRS'))
     return results # filter against dictionary
 
 if __name__ == '__main__':
