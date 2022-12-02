@@ -114,7 +114,7 @@ for book in books["items"][-27:]: # collecte the new testament books
                                 bible_url,
                                 version
                             )
-rootPath = "./bible/"
+rootPath = "./corpora/bible/"
 if not path.exists(rootPath):   
     mkdir(rootPath)
 for book_name, book in all_chapters.items():

@@ -48,13 +48,13 @@ def lemmatize(word: str):
         results.append(stdN(word[:-2])+('PRP_N',))
     # futureN, presentN
     elif negationPrefix(word): #n..
-        results.append(stdN(word)+('FUT_N/PRS_N',))
+        results.append(stdN(word)+('PRS_N/FUT_N',))
     # def pastN(word: str):
     elif word[0] == 'a' and negationPrefix(word[1:]): # an..
         results.append(stdN(word[1:])+('PST_N',))
     # progressiveN_immFutureN
     elif word[:2] == 're' and negationPrefix(word[2:]): #ren..
-        results.append(stdN(word[2:])+('IMF_N/PRG_N',))
+        results.append(stdN(word[2:])+('PRG_N/IMF_N',))
     # progressive
     elif word[:2] == 're': #re..
         results.append((word[2:],'PRG'))
