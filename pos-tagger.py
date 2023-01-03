@@ -22,7 +22,7 @@ tenses = {key: [] for key in ['PRS', 'FUT', 'PRG', 'IMF', 'PST', 'PRP',
 simpleTag = {} # provide a mapping from the detailed parts of speech in English to smaller, simpler set
 for v in ['VB', 'VBP', 'VBZ', 'VBD', 'VBN', 'VBG']:
     simpleTag[v] = "VERB"
-for n in ['NN', 'NNS', 'NNP',  'NNPS']:
+for n in ['NN', 'NNS', 'NNP',  'NNPS', 'PRP']:
     simpleTag[n] = "NOUN"
 for j in ['JJ', 'JJR', 'JJS']:
     simpleTag[j] = "ADJ"
@@ -38,15 +38,13 @@ def main():
         for word in line.translate(str.maketrans('', '', punctuation)).split():
             print("-----")
             for i in lemmatizeVerb(word.lower()): # list of possible tenses if a verb
-                if createTinyFile(i['English']): # create tiny file and return success code
-                    success, tag = tagTinyFile()
-                    if not success: # something went wrong with the tagging
-                        continue
-                else: # something went wrong with the file creation
+                success, tag = tagWord(i["English"])
+                if not success: # something went wrong with the tagging
                     continue
                 potentialTag = simpleTag.get(tag, tag)
                 
-                # if tense == prs, it is either an actual present verb or different part of speech entirely
+                # if tense == prs:
+                # it is either an actual present verb or different part of speech entirely
 
                 if i["Tense"] != "PRS": # some inflection is performed, likely a verb
                     if i["Tense"] in ['PRS_N/FUT_N', 'PRP_N']: # n..
@@ -55,21 +53,22 @@ def main():
                         continue # ignore, false lemmatization
                 
                 print(word, potentialTag)
+                print("--")
 
-"""Create a file that serves as input to the Stanford Part of Speech Tagger.
-    and execute the Stanford Part of Speech Tagger.
-    Return an exit code of false if something fails,
-    as well as the output of the tagger"""
-def tag(word):
+""" Create a file as input for and execute the Stanford Part of Speech Tagger.
+    Return an exit code of false if something fails, as well as the output of the tagger"""
+
+def tagWord(word):
     with open('temp.tag', 'w') as file:
         file.write(word)
-    exitCode = os.system("cd stanford-postagger-full-2020-11-17; \
-                         ./stanford-postagger.sh models/english-left3words-distsim.tagger ../temp.tag > ../output")
+    exitCode = os.system("cd postagger; \
+                         ./stanford-postagger.sh models/english-left3words-distsim.tagger ../temp.tag > ../output 2>/dev/null")
     if exitCode != 0:
         return False, ""
     with open("output") as file:
         output = file.read()
-        print(output)
-    return True , [output[output.rindex("_")+1:].strip() for output in output.split()]
+        # print(output)
+    return True , output[output.rindex("_")+1:].strip()
 
-print(tag("I . am . going . to . run ."))
+if __name__ == '__main__':
+    main()

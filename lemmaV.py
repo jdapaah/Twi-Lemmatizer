@@ -3,12 +3,12 @@ from vowels import VOWEL_SML_O as o#ɔ
 from vowels import VOWEL_SML_E as e#ɛ
 from vowels import VOWEL_CAP_E as E#Ɛ
 from vowels import VOWEL_CAP_O as O#Ɔ
-from tenses import tenses
 
-from translate import translate as attemptTranslate
+from google.cloud import translate_v2 as translate
 
 complement_word_ending = ['i'+e, 'e'+e]
 irregular_verbs = {"nni": 'w'+o, 'mfa': 'de'}
+translate_client = translate.Client()
 
 # return true if the word actually exist in Twi
 # proto word needs to be at least two characters long
@@ -17,7 +17,8 @@ def filter(words):
     new_list = []
     for wordObj in words:
         word = wordObj["Root"]
-        attempt = attemptTranslate([word])
+        res = translate_client.translate(word, source_language='ak', target_language='en')
+        attempt = res['translatedText']
         if attempt != word: # if twi translation to english does not fail
             wordObj["English"] = attempt
             new_list.append(wordObj) # is an actual lemmatized verb, add to list
@@ -64,7 +65,7 @@ def lemmatizeVerb(word: str):
         for protoRoot in stdN(word[:-1]):
             results.append({"Twi": word, "Root": protoRoot, "Tense": 'PRP_N'})
     # presPerfN wo comp
-    if negationPrefix(word) and word[-2:] in complement_word_ending: # n...ie
+    if negationPrefix(word) and word[-2:] in complement_word_ending: # n...iɛ
         for protoRoot in stdN(word[:-2]):
             results.append({"Twi": word, "Root": protoRoot, "Tense": 'PRP_N'})
     # futureN, presentN
@@ -89,12 +90,14 @@ def lemmatizeVerb(word: str):
     if word[:4] == 'rebɛ': # rebɛ..
         results.append({"Twi": word, "Root": word[4:], "Tense": 'IMF'})
     # presPerf
-    if word[0] == 'a' and len(word)>3: # a..
+    if word[0] == 'a': # a..
         results.append({"Twi": word, "Root": word[1:], "Tense": 'PRP'})
-    # past w comp [..ie] or past wo comp ..xx
-    if word[-2:] in complement_word_ending or \
-       word[-1]==word[-2]: #  
+    # past w comp ..iɛ
+    if word[-2:] in complement_word_ending :
         results.append({"Twi": word, "Root": word[:-2], "Tense": 'PST'})
+    # past wo comp ..xx
+    if word[-1]==word[-2]: #  
+        results.append({"Twi": word, "Root": word[:-1], "Tense": 'PST'})
     results.append({"Twi": word, "Root": word, "Tense": 'PRS'})
     
     return filter(results) # filter against dictionary
