@@ -2,3 +2,7 @@
 __pycache__/
 *.zip
 **/.DS_Store
+
+# 
+gc_account.py
+api_key.json
