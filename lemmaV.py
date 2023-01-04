@@ -1,18 +1,18 @@
-# Attempt optimazation of memoziation - if known attempt is not a verb, save it
+#!python3
 from vowels import VOWEL_SML_O as o#ɔ
 from vowels import VOWEL_SML_E as e#ɛ
-from vowels import VOWEL_CAP_E as E#Ɛ
-from vowels import VOWEL_CAP_O as O#Ɔ
 
 from google.cloud import translate_v2 as translate
+from google.oauth2 import service_account
 
 complement_word_ending = ['i'+e, 'e'+e]
 irregular_verbs = {"nni": 'w'+o, 'mfa': 'de'}
-translate_client = translate.Client()
+# Attempt optimazation of memoziation - if known attempt is not a verb, save it
+credentials = service_account.Credentials.from_service_account_file("api-key.json")
+translate_client = translate.Client(target_language='ak', credentials=credentials)
 
-# return true if the word actually exist in Twi
-# proto word needs to be at least two characters long
-
+""" Checks if the potential root is an actual word in Twi.
+    This cruially does not check if the root is a verb. """
 def filter(words):
     new_list = []
     for wordObj in words:
@@ -21,11 +21,12 @@ def filter(words):
         attempt = res['translatedText']
         if attempt != word: # if twi translation to english does not fail
             wordObj["English"] = attempt
-            new_list.append(wordObj) # is an actual lemmatized verb, add to list
+            new_list.append(wordObj) # is an actual lemmatized word, add to list
     return new_list
 
+""" This removes the n prefix from `word` and
+    returns a list of guesses of the root word. """
 def stdN(word: str):
-    # remove the n prefix and guess the root word
     if word in irregular_verbs:
         return [irregular_verbs[word]]
     ret = []
@@ -52,11 +53,11 @@ def negationPrefix(word: str):
         return True
     return False
 
-"""Lemmatize the given word without context, assuming the part of speech is a verb.
-   This function operates by lemmatizing the word in all manners possible, and then
-   sending a request to Google Translate to attempt to translate the proto-word 
-   into English. If the attempted translation exists as a word in the English 
-   language, it is returned to the client."""
+""" Lemmatize the given word without context, assuming the part of speech is a verb.
+    This function operates by lemmatizing the word in all manners possible, and then
+    sending a request to Google Translate to attempt to translate the proto-word 
+    into English. If the attempted translation exists as a word in the English 
+    language, it is returned to the client. """
 
 def lemmatizeVerb(word: str):
     results = []

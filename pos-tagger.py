@@ -1,3 +1,4 @@
+#!python3
 from vowels import VOWEL_SML_O as o#ɔ
 from vowels import VOWEL_SML_E as e#ɛ
 from vowels import VOWEL_CAP_E as E#Ɛ
@@ -7,6 +8,9 @@ from lemmaV import lemmatizeVerb
 from string import punctuation
 from sys import argv
 import os
+import time
+import stanza
+import nltk
 
 """
 PRS: Present, 
@@ -52,23 +56,26 @@ def main():
                     elif potentialTag != 'VERB': # if modified but not a verb
                         continue # ignore, false lemmatization
                 
-                print(word, potentialTag)
+                print(word, i["Root"], potentialTag, i["English"])
                 print("--")
+    os.system("rm *.tag") # cleanup, remove intermediate files
 
 """ Create a file as input for and execute the Stanford Part of Speech Tagger.
     Return an exit code of false if something fails, as well as the output of the tagger"""
 
 def tagWord(word):
-    with open('temp.tag', 'w') as file:
+    return nltk.pos_tag([word])[0]
+
+def tagWordO(word):
+    with open('in.tag', 'w') as file:
         file.write(word)
-    exitCode = os.system("cd postagger; \
-                         ./stanford-postagger.sh models/english-left3words-distsim.tagger ../temp.tag > ../output 2>/dev/null")
+    exitCode = os.system("cd stanford-postagger-full-2020-11-17; \
+                         ./stanford-postagger.sh models/english-left3words-distsim.tagger ../in.tag > ../out.tag 2>/dev/null")
     if exitCode != 0:
         return False, ""
-    with open("output") as file:
+    with open("out.tag") as file:
         output = file.read()
-        # print(output)
-    return True , output[output.rindex("_")+1:].strip()
+    return True, output[output.rindex("_")+1:].strip()
 
 if __name__ == '__main__':
     main()

@@ -3,6 +3,5 @@ __pycache__/
 *.zip
 **/.DS_Store
 
-# 
-gc_account.py
-api_key.json
+# Hidden for security, create for each user 
+api-key.json
