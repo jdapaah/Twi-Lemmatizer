@@ -1,6 +1,6 @@
 #!python3
-from vowels import VOWEL_SML_O as o#ɔ
-from vowels import VOWEL_SML_E as e#ɛ
+from vowels import VOWEL_SMALL_O as o#ɔ
+from vowels import VOWEL_SMALL_E as e#ɛ
 
 from google.cloud import translate_v2 as translate
 from google.oauth2 import service_account
@@ -9,7 +9,7 @@ complement_word_ending = ['i'+e, 'e'+e]
 irregular_verbs = {"nni": 'w'+o, 'mfa': 'de'}
 # Attempt optimazation of memoziation - if known attempt is not a verb, save it
 credentials = service_account.Credentials.from_service_account_file("api-key.json")
-translate_client = translate.Client(target_language='ak', credentials=credentials)
+translate_client = translate.Client(credentials=credentials)
 
 """ Checks if the potential root is an actual word in Twi.
     This cruially does not check if the root is a verb. """
