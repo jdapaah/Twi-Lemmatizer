@@ -3,4 +3,8 @@ google-cloud-translate==2.0.1
 json
 requests
 nltk
+wheel
+numpy
+sklearn
+matplotlib
 pyenchant

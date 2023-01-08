@@ -1,4 +1,0 @@
-VOWEL_CAPITAL_O = 'Ɔ'
-VOWEL_SMALL_O = 'ɔ'
-VOWEL_CAPITAL_E = 'Ɛ'
-VOWEL_SMALL_E = 'ɛ'

@@ -1,6 +1,6 @@
 #!python3
-from vowels import VOWEL_SMALL_O as o#ɔ
-from vowels import VOWEL_SMALL_E as e#ɛ
+from characters import VOWEL_SMALL_O as o#ɔ
+from characters import VOWEL_SMALL_E as e#ɛ
 
 from google.cloud import translate_v2 as translate
 from google.oauth2 import service_account
@@ -13,38 +13,43 @@ credentials = service_account.Credentials.from_service_account_file("service-acc
 translate_client = translate.Client(credentials=credentials)
 englishCheck = enchant.Dict("en_GB")
 
-""" Checks if the potential root is an actual word in Twi.
-    This cruially does not check if the root is a verb. """
-def filter(words: list[dict], firstAttempt=True):
+def filter(words: list[dict], firstAttempt=True) -> list[dict]:
+    """ Checks if the potential roots in `words` are actual words in Twi 
+    (or loanwords from English). It does not check if the roots are verbs. """
     new_list = []
     for wordObj in words:
         word = wordObj["Root"]
         if firstAttempt:
             word = word.lower()
+        # hard code a few words 
         if word == 'de':
             wordObj["English"] = 'put'
             new_list.append(wordObj)
-        res = translate_client.translate(word, source_language='ak', target_language='en', format_='text')
-        translationAttempt = res['translatedText']
-        if translationAttempt != word or englishCheck.check(word): # if twi translation to english does not fail
-            wordObj["English"] = translationAttempt
-            new_list.append(wordObj) # is an actual lemmatized word, add to list
+        elif word == 'mo':
+            wordObj["English"] = "y'all"
+            new_list.append(wordObj)
+        else:
+            res = translate_client.translate(word, source_language='ak', target_language='en', format_='text')
+            translationAttempt = res['translatedText']
+            if translationAttempt != word or englishCheck.check(word): # if twi translation to english does not fail or its a loanword
+                wordObj["English"] = translationAttempt
+                new_list.append(wordObj) # is an actual lemmatized word, add to list
         
-    if not new_list and firstAttempt: 
+    if not new_list and firstAttempt: # if nothing with lowercase
         upped = []
         for poss in words:
-            poss["Root"] = poss["Root"].capitalize()
+            poss["Root"] = poss["Root"].capitalize() # try capitalizing
             upped.append(poss)
         return filter(upped, firstAttempt=False)
-    if not new_list and not firstAttempt:
-        words[-1]['Root'] = words[-1]['Root'].lower()
-        return words[-1:] #give up and return the present without a translation [maybe its a name?]
+    if not new_list and not firstAttempt: # if no results from capitalizing as well
+        words[-1]['Root'] = words[-1]['Root'].lower() # 
+        return words[-1:] # give up and return the present without a translation [maybe its a name?]
     else:
         return new_list
 
-""" This removes the n prefix from `word` and
-    returns a list of guesses of the root word. """
 def stdN(word: str):
+    """ This removes the n prefix from `word` and
+    returns a list of guesses of the root word. """
     if word in irregular_verbs:
         return [irregular_verbs[word]]
     ret = []
@@ -63,21 +68,21 @@ def stdN(word: str):
     return ret
 
 
-# return if the word can be a possible negation prefix
 def negationPrefix(word: str):
+    """ return whether or not `word` has the negation prefix """    
     if word[:2] in ['mm', 'mp', 'mf']:
         return True
     if word[0] == 'n':
         return True
     return False
 
-""" Lemmatize the given word without context, assuming the part of speech is a verb.
+def lemmatizeVerb(word: str) -> list[dict]:
+    """ Lemmatize `word` without context, assuming the part of speech is a verb.
     This function operates by lemmatizing the word in all manners possible, and then
     sending a request to Google Translate to attempt to translate the proto-word 
-    into English. If the attempted translation exists as a word in the English 
-    language, it is returned to the client. """
+    into English. If the attempted translations exists as a word in the English 
+    language, they are returned to the client. """
 
-def lemmatizeVerb(word: str):
     results = []
     # presperfN w comp
     if negationPrefix(word) and word[-1]==word[-2]: # n..xx
@@ -123,4 +128,4 @@ def lemmatizeVerb(word: str):
 
 if __name__ == '__main__':
     while 1:
-        print(lemmatizeVerb(input())[0]["English"])
+        print(lemmatizeVerb(input()))
