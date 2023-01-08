@@ -1,8 +1,4 @@
 #!python3
-from vowels import VOWEL_SML_O as o#ɔ
-from vowels import VOWEL_SML_E as e#ɛ
-from vowels import VOWEL_CAP_E as E#Ɛ
-from vowels import VOWEL_CAP_O as O#Ɔ
 from lemmaV import lemmatizeVerb
 
 from string import punctuation
@@ -26,14 +22,19 @@ tenses = {key: [] for key in ['PRS', 'FUT', 'PRG', 'IMF', 'PST', 'PRP',
 simpleTag = {} # provide a mapping from the detailed parts of speech in English to smaller, simpler set
 for v in ['VB', 'VBP', 'VBZ', 'VBD', 'VBN', 'VBG']:
     simpleTag[v] = "VERB"
-for n in ['NN', 'NNS', 'NNP',  'NNPS', 'PRP']:
+for n in ['NN', 'NNS', 'NNP',  'NNPS']:
     simpleTag[n] = "NOUN"
+for pn in ['PRP', 'PRP$']:
+    simpleTag[pn] = "PRONOUN"
 for j in ['JJ', 'JJR', 'JJS']:
-    simpleTag[j] = "ADJ"
-for a in ['RB', 'RBR', 'RBS']:
+    simpleTag[j] = "ADJECTIVE"
+for a in ['RB', 'RBR', 'RBS', 'WRB']:
     simpleTag[a] = "ADVERB"
+simpleTag["CD"] = "NUMERAL"
+simpleTag["CC"] = "CONJUNCTION"
+simpleTag["UH"] = "INTERJUNCTION"
 for p in ['TO', 'IN']:
-    simpleTag[p] = "PREPOS"
+    simpleTag[p] = "PREPOSITION"
 
 # The present tense functions as the default in the lemmatizer
 # so it removed from the statistics to avoid heavily skewing the data
@@ -41,8 +42,9 @@ def main():
     for line in open(argv[1]):
         for word in line.translate(str.maketrans('', '', punctuation)).split():
             print("-----")
-            for i in lemmatizeVerb(word.lower()): # list of possible tenses if a verb
-                success, tag = tagWord(i["English"])
+            for i in lemmatizeVerb(word): # list of possible tenses if a verb
+                print(i)
+                success, tag = tagWord(i.get("English"))
                 if not success: # something went wrong with the tagging
                     continue
                 potentialTag = simpleTag.get(tag, tag)
@@ -63,10 +65,12 @@ def main():
 """ Create a file as input for and execute the Stanford Part of Speech Tagger.
     Return an exit code of false if something fails, as well as the output of the tagger"""
 
-def tagWord(word):
+def tagWordO(word):
     return nltk.pos_tag([word])[0]
 
-def tagWordO(word):
+def tagWord(word):
+    if word == "": # word was never translated
+        return True, "UNKNOWN"
     with open('in.tag', 'w') as file:
         file.write(word)
     exitCode = os.system("cd stanford-postagger-full-2020-11-17; \

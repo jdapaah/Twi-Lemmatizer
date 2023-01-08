@@ -4,25 +4,43 @@ from vowels import VOWEL_SMALL_E as e#ɛ
 
 from google.cloud import translate_v2 as translate
 from google.oauth2 import service_account
+import enchant
 
 complement_word_ending = ['i'+e, 'e'+e]
 irregular_verbs = {"nni": 'w'+o, 'mfa': 'de'}
 # Attempt optimazation of memoziation - if known attempt is not a verb, save it
-credentials = service_account.Credentials.from_service_account_file("api-key.json")
+credentials = service_account.Credentials.from_service_account_file("service-account.json")
 translate_client = translate.Client(credentials=credentials)
+englishCheck = enchant.Dict("en_GB")
 
 """ Checks if the potential root is an actual word in Twi.
     This cruially does not check if the root is a verb. """
-def filter(words):
+def filter(words: list[dict], firstAttempt=True):
     new_list = []
     for wordObj in words:
         word = wordObj["Root"]
-        res = translate_client.translate(word, source_language='ak', target_language='en')
-        attempt = res['translatedText']
-        if attempt != word: # if twi translation to english does not fail
-            wordObj["English"] = attempt
+        if firstAttempt:
+            word = word.lower()
+        if word == 'de':
+            wordObj["English"] = 'put'
+            new_list.append(wordObj)
+        res = translate_client.translate(word, source_language='ak', target_language='en', format_='text')
+        translationAttempt = res['translatedText']
+        if translationAttempt != word or englishCheck.check(word): # if twi translation to english does not fail
+            wordObj["English"] = translationAttempt
             new_list.append(wordObj) # is an actual lemmatized word, add to list
-    return new_list
+        
+    if not new_list and firstAttempt: 
+        upped = []
+        for poss in words:
+            poss["Root"] = poss["Root"].capitalize()
+            upped.append(poss)
+        return filter(upped, firstAttempt=False)
+    if not new_list and not firstAttempt:
+        words[-1]['Root'] = words[-1]['Root'].lower()
+        return words[-1:] #give up and return the present without a translation [maybe its a name?]
+    else:
+        return new_list
 
 """ This removes the n prefix from `word` and
     returns a list of guesses of the root word. """
@@ -105,4 +123,4 @@ def lemmatizeVerb(word: str):
 
 if __name__ == '__main__':
     while 1:
-        print(lemmatizeVerb(input()))
+        print(lemmatizeVerb(input())[0]["English"])
