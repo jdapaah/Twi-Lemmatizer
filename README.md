@@ -6,6 +6,13 @@ Advised by Christiane Fellbaum
 
 to use, install google, nltk, enchant
 you will need to install some packages for nltk (via python) and enchant (via homebrew)
+you also need to install the nlp core server
+```
+    curl https://downloads.cs.stanford.edu/nlp/software/stanford-corenlp-full-2018-02-27.zip --output server.zip
+    unzip server.zip
+    rm server.zip
+```
+The server can be started with ./nlpserver start and stopped with ./nlpserver kill
 
 [unlikely] also install post from stanford if u want to use that instead?
 

@@ -25,30 +25,24 @@ for prp in ['PRP', 'PRP$', 'WP', 'WP$']:
     simpleTag[prp] = "PRONOUN"
 for jj in ['JJ', 'JJR', 'JJS']:
     simpleTag[jj] = "ADJECTIVE"
-for av in ['RB', 'RBR', 'RBS', 'WRB']:
-    simpleTag[av] = "ADVERB"
+for rb in ['RB', 'RBR', 'RBS', 'WRB']:
+    simpleTag[rb] = "ADVERB"
 simpleTag["CD"] = "NUMERAL"
 simpleTag["CC"] = "CONJUNCTION"
 simpleTag["UH"] = "INTERJECTION"
-
 for dt in ['DT', 'WDT']:
     simpleTag[dt] = "DETERMINER"
-for pp in ['TO', 'IN']:
-    simpleTag[pp] = "PREPOSITION"
+for to in ['TO', 'IN']:
+    simpleTag[to] = "PREPOSITION"
 
-
-os.system("""java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer \
--preload pos \
--status_port 9000 -port 9000 -timeout 15000 & """)
-pos_tagger = nltk.parse.CoreNLPParser(url='http://localhost:9000', tagtype='pos')
 
 def tag(word: str) -> list[str]:
     """ tagging for the purpose of sending a list of possibilities to the evaluator """
     possibilities = []
     for i in lemmaV.lemmatizeVerb(word): # list of possible tenses if a verb
-        success, tags = tagSFDP(i.get("English", i['Root']))
-        if not success: # something went wrong with the tagging
-            continue
+        tags = tagSFDP(i.get("English", i['Root']))
+        # tags = tagNLTK(i.get("English", i['Root']))
+        # tags = tagSFDJ(i.get("English", i['Root']))
         potentialTags = [simpleTag.get(tag, tag) for tag in tags]
         
         # if tense == prs:
@@ -91,7 +85,6 @@ def main():
         for word in line.translate(str.maketrans('', '', '!,.?')).split():
             print("-----")
             for i in lemmaV.lemmatizeVerb(word): # list of possible tenses if a verb
-                print(i)
                 tags = tagSFDP(i.get("English", i['Root']))
                 potentialTag = get_highest_ranked([simpleTag.get(t, t) for t in tags])
                 
@@ -106,28 +99,30 @@ def main():
     os.system("rm *.tag") # cleanup, remove intermediate files
 
 
+pos_tagger = nltk.parse.CoreNLPParser(url='http://localhost:9000', tagtype='pos')
+def tagSFDP(words: str):
+    """ Use the Stanford CoreNLPServer"""
+    return [x[1] for x in pos_tagger.tag(words.split())]
+    
 def tagNLTK(words: str):
     """ Use the NLTK POS Tagger """
-    return nltk.pos_tag(nltk.word_tokenize(words))
+    return [x[1] for x in nltk.pos_tag(words.split())]
 
 def tagSFDJ(words: str):
     """ Create a file as input for and execute the Stanford Part of Speech Tagger.
         Return an exit code of false if something fails, as well as the output of the tagger"""
     with open('in.tag', 'w') as file:
         file.write(words)
-    exitCode = os.system("cd spag; \
+    exitCode = os.system("cd stanford-postagger-full-2020-11-17; \
                          ./stanford-postagger.sh models/english-left3words-distsim.tagger ../in.tag > ../out.tag 2>/dev/null")
     if exitCode != 0:
-        return ""
+        return "UNKNOWN"
     with open("out.tag") as file:
         output = file.read().split()
     return [word[word.rindex("_")+1:].strip() for word in output]
 
-def tagSFDP(words: str):
-    """ Use the Stanford CoreNLPServer"""
-    return [x[1] for x in pos_tagger.tag(words)]
-
 if __name__ == '__main__':
-    while 1:
-        print(tag(input()))
+    print(tag("Enjoying good food on the holidays, especially with family, is the best feeling to have."))
+    # while 1:
+        # print(tag("input()"))
     # main()
