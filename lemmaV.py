@@ -26,7 +26,7 @@ def filter(words: list[dict], firstAttempt=True) -> list[dict]:
             wordObj["English"] = 'put'
             new_list.append(wordObj)
         elif word == 'mo':
-            wordObj["English"] = "y'all"
+            wordObj["English"] = "you"
             new_list.append(wordObj)
         else:
             res = translate_client.translate(word, source_language='ak', target_language='en', format_='text')
