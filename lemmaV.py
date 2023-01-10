@@ -8,7 +8,6 @@ import enchant
 
 complement_word_ending = ['i'+e, 'e'+e]
 irregular_verbs = {"nni": 'w'+o, 'mfa': 'de'}
-# Attempt optimazation of memoziation - if known attempt is not a verb, save it
 credentials = service_account.Credentials.from_service_account_file("service-account.json")
 translate_client = translate.Client(credentials=credentials)
 englishCheck = enchant.Dict("en_GB")
@@ -31,7 +30,7 @@ def filter(words: list[dict], firstAttempt=True) -> list[dict]:
         else:
             res = translate_client.translate(word, source_language='ak', target_language='en', format_='text')
             translationAttempt = res['translatedText']
-            if translationAttempt != word or englishCheck.check(word): # if twi translation to english does not fail or its a loanword
+            if translationAttempt != word: # if twi translation to english does not fail
                 wordObj["English"] = translationAttempt
                 new_list.append(wordObj) # is an actual lemmatized word, add to list
         
@@ -42,8 +41,9 @@ def filter(words: list[dict], firstAttempt=True) -> list[dict]:
             upped.append(poss)
         return filter(upped, firstAttempt=False)
     if not new_list and not firstAttempt: # if no results from capitalizing as well
-        words[-1]['Root'] = words[-1]['Root'].lower() # 
-        return words[-1:] # give up and return the present without a translation [maybe its a name?]
+        words[-1]['Root'] = words[-1]['Root'].lower()
+        words[-1]["English"] = wordObj["Twi"] # give up and return the present without a translation [maybe its a name?]
+        return words[-1:]
     else:
         return new_list
 

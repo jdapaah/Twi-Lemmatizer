@@ -6,4 +6,3 @@ nltk
 numpy
 scikit-learn
 matplotlib
-pyenchant
