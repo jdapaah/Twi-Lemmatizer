@@ -14,8 +14,6 @@ you also need to install the nlp core server
 ```
 The server can be started with ./nlpserver start and stopped with ./nlpserver kill
 
-[unlikely] also install post from stanford if u want to use that instead?
-
 Create a google cloud account
 create a project
 enable the cloud translation api for the project
