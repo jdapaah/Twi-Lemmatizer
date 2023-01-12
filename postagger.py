@@ -21,7 +21,7 @@ for prp in ['PRP', 'PRP$', 'WP', 'WP$']:
     simpleTag[prp] = "PRNN"
 for jj in ['JJ', 'JJR', 'JJS']:
     simpleTag[jj] = "ADJ"
-for rb in ['RB', 'RBR', 'RBS', 'WRB']:
+for rb in ['RB', 'RBR', 'RBS', 'WRB', "RP"]:
     simpleTag[rb] = "ADV"
 simpleTag["CD"] = "NUM"
 simpleTag["CC"] = "CONJ"
@@ -50,13 +50,13 @@ def tag(word: str) -> list[str]:
 
         # some inflection is performed, likely a verb
         if i["Tense"] != "PRS" and \
-        get_highest_ranked(potentialTags, translation) != 'VERB': # if modified but not a verb
+        get_highest_ranked(potentialTags) != 'VERB': # if modified but not a verb
             continue # ignore, false lemmatization
         #  print(word, "({})".format(i["Root"]), potentialTags, i["English"])
         possibilities += potentialTags
     return possibilities if possibilities else ["UNK"]
 
-def get_highest_ranked(listOfParts:list[str], word:str) -> str:
+def get_highest_ranked(listOfParts:list[str]) -> str:
     """Given an list of parts of speech , return the 'strongest'"""
     if "VERB" in listOfParts:
         return "VERB"

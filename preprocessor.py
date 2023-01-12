@@ -1,4 +1,6 @@
 #!python3
+""" Prepare the text corpus by standardizing charcters such as 
+    ɛ, ɔ, and the apostrophe throughout the corpus. """
 import sys
 from characters import correction
 

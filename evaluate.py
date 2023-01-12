@@ -39,7 +39,7 @@ def main():
                         fprint(pos)
                         y_predict.append(pos)
                     else: # if incorrect, assign it to whoever is the strongest
-                        falsePos = postagger.get_highest_ranked(possibilities, word)
+                        falsePos = postagger.get_highest_ranked(possibilities)
                         fprint(falsePos)
                         y_predict.append(falsePos)
             counter = (counter+1)%3

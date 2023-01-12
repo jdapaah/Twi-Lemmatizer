@@ -97,7 +97,7 @@ def lemmatizeVerb(word: str) -> list[dict]:
         for protoRoot in stdN(word):
             results.append({"Twi": word, "Root": protoRoot, "Tense": 'PRS_N/FUT_N'})
     # pastN
-    if word[0] == 'a' and negationPrefix(word[1:]): # an..
+    if word[0] == 'a' and len(word)>2 and negationPrefix(word[1:]): # an..
         for protoRoot in stdN(word[1:]):
             results.append({"Twi": word, "Root": protoRoot, "Tense":'PST_N'})
     # progressiveN_immFutureN
@@ -114,13 +114,13 @@ def lemmatizeVerb(word: str) -> list[dict]:
     if word[:4] == 'rebɛ': # rebɛ..
         results.append({"Twi": word, "Root": word[4:], "Tense": 'IMF'})
     # presPerf
-    if word[0] == 'a': # a..
+    if word[0] == 'a' and len(word)>1: # a..
         results.append({"Twi": word, "Root": word[1:], "Tense": 'PRP'})
     # past w comp ..iɛ
     if word[-2:] in complement_word_ending :
         results.append({"Twi": word, "Root": word[:-2], "Tense": 'PST'})
     # past wo comp ..xx
-    if word[-1]==word[-2]: #  
+    if len(word) >= 2 and word[-1]==word[-2]: #  
         results.append({"Twi": word, "Root": word[:-1], "Tense": 'PST'})
     results.append({"Twi": word, "Root": word, "Tense": 'PRS'})
     
